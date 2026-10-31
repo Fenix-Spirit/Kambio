@@ -1,4 +1,4 @@
-package com.spiritfenix.Kambio
+package com.spiritfenix.kambio
 
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
