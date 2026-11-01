@@ -63,6 +63,9 @@ fun Application.module() {
 				RatesResponse(base, cached.date.toString(), cached.fetchedAt.toString(), rates)
 			)
 		}
+		get("/api/currencies") {
+			call.respond(service.get("EUR").rates.keys.sorted())
+		}
 	}
 	launch {
 		while (isActive){
