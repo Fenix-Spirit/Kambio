@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.forwardedheaders.XForwardedHeaders
 import io.ktor.server.plugins.ratelimit.RateLimit
 import io.ktor.server.plugins.ratelimit.RateLimitName
 import io.ktor.server.plugins.ratelimit.rateLimit
@@ -39,7 +40,7 @@ fun Application.module() {
 		http.close()
 		dataSource.close()
 	}
-
+	install(XForwardedHeaders)
 	install(ContentNegotiation){json()}
 	install(StatusPages){
 		exception<UnknownCurrencyException> { call, cause ->

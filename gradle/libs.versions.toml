@@ -24,6 +24,7 @@ exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", versio
 hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 ktor-rate-limiting = {module = "io.ktor:ktor-server-rate-limit", version.ref = "ktor"}
+ktor-forwarded-header = { module = "io.ktor:ktor-server-forwarded-header", version.ref = "ktor"}
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

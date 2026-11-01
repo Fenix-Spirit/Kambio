@@ -28,6 +28,7 @@ dependencies {
 	implementation(libs.hikari)
 	implementation(libs.postgresql)
 	implementation(libs.ktor.rate.limiting)
+	implementation(libs.ktor.forwarded.header)
 }
 ktor {
 	fatJar {
