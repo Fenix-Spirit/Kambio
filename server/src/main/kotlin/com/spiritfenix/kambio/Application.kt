@@ -13,6 +13,10 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.hours
 
 fun main() {
 	embeddedServer(
@@ -58,6 +62,12 @@ fun Application.module() {
 			call.respond(
 				RatesResponse(base, cached.date.toString(), cached.fetchedAt.toString(), rates)
 			)
+		}
+	}
+	launch {
+		while (isActive){
+			service.refreshAll()
+			delay(1.hours)
 		}
 	}
 }

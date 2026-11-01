@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.Instant
@@ -36,6 +37,11 @@ class RatesRepository {
 				fetchedAt = rows.maxOf { it[RatesTable.fetchedAt] },
 				rates = rows.associate { it[RatesTable.target] to it[RatesTable.rate] },
 			)
+		}
+	}
+	suspend fun bases(): List<String> = withContext(Dispatchers.IO) {
+		transaction {
+			RatesTable.select(RatesTable.base).withDistinct().map { it[RatesTable.base] }
 		}
 	}
 }
