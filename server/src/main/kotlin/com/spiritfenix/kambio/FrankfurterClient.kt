@@ -12,15 +12,16 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-private const val BASE_URL = "https://api.frankfurter.dev/v1"
+private const val BASE_URL = "https://api.frankfurter.dev/v2"
 class UnknownCurrencyException : Exception("Unknown base or currency symbol")
 class UpstreamException(cause: Throwable) : Exception("Rates provider failed", cause)
 
 @Serializable
-internal data class FrankfurterResponse(
+internal data class FrankfurterRate(
 	val base: String,
 	val date: String,
-	val rates: Map<String, Double>,
+	val quote: String,
+	val rate: Double
 )
 
 fun createHttpClient() = HttpClient(CIO) {
@@ -35,11 +36,10 @@ fun createHttpClient() = HttpClient(CIO) {
 }
 
 internal class FrankfurterClient(private val http: HttpClient) {
-	suspend fun latest(base: String, symbols: List<String>?): FrankfurterResponse {
+	suspend fun latest(base: String): List<FrankfurterRate> {
 		try {
-			return http.get("$BASE_URL/latest") {
+			return http.get("$BASE_URL/rates") {
 				parameter("base", base)
-				if (!symbols.isNullOrEmpty()) parameter("symbols", symbols.joinToString(","))
 			}.body()
 		} catch (e: ClientRequestException) {
 			when (e.response.status) {

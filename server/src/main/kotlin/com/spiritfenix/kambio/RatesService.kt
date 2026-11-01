@@ -14,9 +14,14 @@ internal class RatesService(
 ) {
 	private val logger: Logger = LoggerFactory.getLogger(RatesService::class.java)
 	suspend fun refresh(base: String): CachedRates {
-		val upstream = client.latest(base, symbols = null)
-		val cached = CachedRates(LocalDate.parse(upstream.date), Instant.now(), upstream.rates)
-		repo.replace(upstream.base, cached)
+		val rows = client.latest(base)
+		val date =rows.maxOfOrNull { it.date }?: throw UpstreamException(IllegalStateException("Empty rates response for $base"))
+		val cached = CachedRates(
+			LocalDate.parse(date),
+			Instant.now(),
+			rows.associate { it.quote to it.rate }
+		)
+		repo.replace(base, cached)
 		return cached
 	}
 	suspend fun get(base: String): CachedRates = repo.find(base) ?: refresh(base)
