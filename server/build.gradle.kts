@@ -22,6 +22,11 @@ dependencies {
 	implementation(libs.ktor.client.cio)
 	implementation(libs.ktor.client.content.negotiation)
 	implementation(libs.ktor.server.status.pages)
+	implementation(libs.exposed.core)
+	implementation(libs.exposed.jdbc)
+	implementation(libs.exposed.java.time)
+	implementation(libs.hikari)
+	implementation(libs.postgresql)
 }
 ktor {
 	fatJar {

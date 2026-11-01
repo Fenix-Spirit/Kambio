@@ -1,5 +1,7 @@
 package com.spiritfenix.kambio
 
+import com.spiritfenix.kambio.db.RatesRepository
+import com.spiritfenix.kambio.db.connectDatabase
 import com.spiritfenix.kambio.shared.ErrorResponse
 import com.spiritfenix.kambio.shared.RatesResponse
 import io.ktor.http.*
@@ -11,7 +13,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.time.Instant
 
 fun main() {
 	embeddedServer(
@@ -23,9 +24,13 @@ fun main() {
 }
 
 fun Application.module() {
+	val dataSource = connectDatabase()
 	val http = createHttpClient()
-	val frankfurter = FrankfurterClient(http)
-	monitor.subscribe(ApplicationStopped){http.close()}
+	val service = RatesService(FrankfurterClient(http), RatesRepository())
+	monitor.subscribe(ApplicationStopped){
+		http.close()
+		dataSource.close()
+	}
 
 	install(ContentNegotiation){json()}
 	install(StatusPages){
@@ -43,14 +48,15 @@ fun Application.module() {
 		get("/api/rates/{base}") {
 			val base = call.parameters["base"]!!.uppercase()
 			val symbols = call.request.queryParameters["symbols"]?.split(",")?.map { it.trim().uppercase() }
-			val upstream = frankfurter.latest(base, symbols)
+			val cached = service.get(base)
+			val rates = if (symbols.isNullOrEmpty()) {
+				cached.rates
+			} else {
+				if (symbols.any { it !in cached.rates }) throw UnknownCurrencyException()
+				cached.rates.filterKeys { it in symbols }
+			}
 			call.respond(
-				RatesResponse(
-					base = upstream.base,
-					date = upstream.date,
-					lastUpdated = Instant.now().toString(),
-					rates = upstream.rates,
-				)
+				RatesResponse(base, cached.date.toString(), cached.fetchedAt.toString(), rates)
 			)
 		}
 	}

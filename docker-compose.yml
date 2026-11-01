@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      #example credentials dev environment only
+      POSTGRES_USER: kambio
+      POSTGRES_PASSWORD: kambio
+      POSTGRES_DB: kambio
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
