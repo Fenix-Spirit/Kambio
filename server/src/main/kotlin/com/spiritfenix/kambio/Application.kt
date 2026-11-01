@@ -10,6 +10,9 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.ratelimit.RateLimit
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,6 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 fun main() {
 	embeddedServer(
@@ -46,25 +50,31 @@ fun Application.module() {
 			call.respond(HttpStatusCode.BadGateway, ErrorResponse("Exchange rate provider unavailable"))
 		}
 	}
+	install(RateLimit){
+		register (RateLimitName("api")){
+			rateLimiter(limit = 60, refillPeriod = 1.minutes)
+		}
+	}
 	routing{
 		get("/") { call.respondText("Currency Converter") }
-
-		get("/api/rates/{base}") {
-			val base = call.parameters["base"]!!.uppercase()
-			val symbols = call.request.queryParameters["symbols"]?.split(",")?.map { it.trim().uppercase() }
-			val cached = service.get(base)
-			val rates = if (symbols.isNullOrEmpty()) {
-				cached.rates
-			} else {
-				if (symbols.any { it !in cached.rates }) throw UnknownCurrencyException()
-				cached.rates.filterKeys { it in symbols }
+		rateLimit(RateLimitName("api")){
+			get("/api/rates/{base}") {
+				val base = call.parameters["base"]!!.uppercase()
+				val symbols = call.request.queryParameters["symbols"]?.split(",")?.map { it.trim().uppercase() }
+				val cached = service.get(base)
+				val rates = if (symbols.isNullOrEmpty()) {
+					cached.rates
+				} else {
+					if (symbols.any { it !in cached.rates }) throw UnknownCurrencyException()
+					cached.rates.filterKeys { it in symbols }
+				}
+				call.respond(
+					RatesResponse(base, cached.date.toString(), cached.fetchedAt.toString(), rates)
+				)
 			}
-			call.respond(
-				RatesResponse(base, cached.date.toString(), cached.fetchedAt.toString(), rates)
-			)
-		}
-		get("/api/currencies") {
-			call.respond(service.get("EUR").rates.keys.sorted())
+			get("/api/currencies") {
+				call.respond(service.get("EUR").rates.keys.sorted())
+			}
 		}
 	}
 	launch {

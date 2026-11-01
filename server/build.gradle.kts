@@ -27,6 +27,7 @@ dependencies {
 	implementation(libs.exposed.java.time)
 	implementation(libs.hikari)
 	implementation(libs.postgresql)
+	implementation(libs.ktor.rate.limiting)
 }
 ktor {
 	fatJar {
