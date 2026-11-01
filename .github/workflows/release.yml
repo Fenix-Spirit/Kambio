@@ -50,7 +50,7 @@ jobs:
           grep -q "version = \"$NEXT\"" build.gradle.kts
           echo "next=$NEXT" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
