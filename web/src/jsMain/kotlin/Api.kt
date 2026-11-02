@@ -14,5 +14,5 @@ private val client = HttpClient {
 
 suspend fun fetchRates(base: String): RatesResponse =
 	client.get("/api/rates/$base").body()
-suspend fun fetchCurrencies():Set<String> =
+suspend fun fetchCurrencies():List<String> =
 	client.get("/api/currencies").body()
