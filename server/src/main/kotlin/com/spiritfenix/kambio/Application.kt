@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.forwardedheaders.XForwardedHeaders
@@ -57,7 +58,7 @@ fun Application.module() {
 		}
 	}
 	routing{
-		get("/") { call.respondText("Currency Converter") }
+		staticResources("/", "static")
 		rateLimit(RateLimitName("api")){
 			get("/api/rates/{base}") {
 				val base = call.parameters["base"]!!.uppercase()

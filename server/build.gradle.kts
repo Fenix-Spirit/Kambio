@@ -35,3 +35,8 @@ ktor {
 		archiveFileName.set("kambio.jar")
 	}
 }
+tasks.processResources {
+	from(project(":web").tasks.named("jsBrowserDistribution")) {
+		into("static")
+	}
+}
