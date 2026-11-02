@@ -81,7 +81,7 @@ fun Application.module() {
 	launch {
 		while (isActive){
 			service.refreshAll()
-			delay(1.hours)
+			delay(24.hours)
 		}
 	}
 }
