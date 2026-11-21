@@ -25,6 +25,7 @@ dependencies {
 	implementation(libs.exposed.core)
 	implementation(libs.exposed.jdbc)
 	implementation(libs.exposed.java.time)
+	implementation(libs.exposed.migration)
 	implementation(libs.hikari)
 	implementation(libs.postgresql)
 	implementation(libs.ktor.rate.limiting)

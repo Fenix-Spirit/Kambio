@@ -6,12 +6,13 @@ import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.javatime.date
 import org.jetbrains.exposed.v1.javatime.timestamp
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 object RatesTable : Table("rates") {
-	val base = varchar("base", 3)
-	val target = varchar("target", 3)
+	val base = varchar("base", 5)
+	val target = varchar("target", 5)
 	val rate = double("rate")
 	val rateDate = date("rate_date")
 	val fetchedAt = timestamp("fetched_at")
@@ -27,6 +28,10 @@ fun connectDatabase(): HikariDataSource {
 	}
 	val dataSource = HikariDataSource(config)
 	Database.connect(dataSource)
-	transaction { SchemaUtils.create(RatesTable) }
+	transaction {
+		MigrationUtils.statementsRequiredForDatabaseMigration(RatesTable).forEach { sql ->
+			TransactionManager.current().exec(sql)
+		}
+	}
 	return dataSource
 }
